@@ -1,32 +1,37 @@
 <script setup lang="ts">
 import { Menu, CheckMenuItem, IconMenuItem } from '@tauri-apps/api/menu';
 import { Image } from '@tauri-apps/api/image';
+import { ref } from 'vue';
 
-let currentLanguage = 'en';
+// let currentLanguage = 'en';
+let currentLanguage = ref('en');
 
-const check_sub_item_1 = await CheckMenuItem.new({
-  id: 'check_sub_item_1',
-  text: 'Check Sub Item 2',
-  checked: true,
+const check_sub_item_en = await CheckMenuItem.new({
+  id: 'en',
+  text: 'English',
+  checked: currentLanguage.value === 'en',
   action: () => {
     console.log('chinese pressed');
-    currentLanguage = 'en';
+    currentLanguage.value = 'en';
+    createMenu();
   },
 });
 
-const check_sub_item_2 = await CheckMenuItem.new({
-  id: 'check_sub_item_2',
-  text: 'Check Sub Item 2',
-  checked: false,
+const check_sub_item_cn = await CheckMenuItem.new({
+  id: 'cn',
+  text: 'Chinese',
+  checked: currentLanguage.value === 'cn',
   action: () => {
     console.log('chinese pressed');
-    currentLanguage = 'cn';
+    currentLanguage.value = 'cn';
+    createMenu();
   },
 });
 
+// Load icon from path
 const icon = await Image.fromPath('../src/icon.png')
 console.log(icon);
-// this will not work.
+
 const icon_item = await IconMenuItem.new({
   id: 'icon_item',
   text: 'Icon Item',
@@ -36,37 +41,46 @@ const icon_item = await IconMenuItem.new({
   },
 });
 
-const menu = await Menu.new({
-  items: [
-    {
-      id: 'quit',
-      text: 'Quit',
-      action: () => {
-        console.log('quit pressed');
-      },
-    },
-    {
-      id: 'close',
-      text: 'Close',
-      action: () => {
-        console.log('close pressed');
-      },
-    },
-    {
-      id: 'language_items',
-      text: 'language',
-      items: [
-        check_sub_item_1,
-        check_sub_item_2,
-        icon_item,
-      ],
-    },
-  ],
-});
+const createMenu = async () => {
 
-menu.setAsAppMenu().then(res => {
-  console.log("menu set success", res);
-});
+  const menu = await Menu.new({
+    items: [
+      {
+        id: 'file',
+        text: 'File',
+        items: [
+          {
+            id: 'open',
+            text: 'Open',
+            action: () => {
+              console.log('open pressed');
+            },
+          },
+          {
+            id: 'quit',
+            text: 'Quit',
+            action: () => {
+              console.log('Quit pressed');
+            },
+          },
+        ],
+      },
+      {
+        id: 'language_items',
+        text: 'language',
+        items: [
+          check_sub_item_en,
+          check_sub_item_cn,
+          icon_item,
+        ],
+      },
+    ],
+  });
+
+  await menu.setAsAppMenu()
+};
+
+createMenu();
 
 </script>
 
