@@ -1,30 +1,34 @@
 <script setup lang="ts">
 import { Menu, CheckMenuItem, IconMenuItem } from '@tauri-apps/api/menu';
 import { Image } from '@tauri-apps/api/image';
-import { ref } from 'vue';
 
-// let currentLanguage = 'en';
-let currentLanguage = ref('en');
+//  todo: `icon`  `text`  `check` type change status
+
+let currentLanguage = 'en';
 
 const check_sub_item_en = await CheckMenuItem.new({
   id: 'en',
   text: 'English',
-  checked: currentLanguage.value === 'en',
+  checked: currentLanguage === 'en',
   action: () => {
-    console.log('chinese pressed');
-    currentLanguage.value = 'en';
-    createMenu();
+    currentLanguage = 'en';
+    check_sub_item_en.setChecked(currentLanguage === "en");
+    check_sub_item_cn.setChecked(currentLanguage === "cn");
+
+    console.log('English pressed');
   },
 });
 
 const check_sub_item_cn = await CheckMenuItem.new({
   id: 'cn',
   text: 'Chinese',
-  checked: currentLanguage.value === 'cn',
+  checked: currentLanguage === 'cn',
   action: () => {
-    console.log('chinese pressed');
-    currentLanguage.value = 'cn';
-    createMenu();
+    currentLanguage = 'cn';
+    check_sub_item_en.setChecked(currentLanguage === "en");
+    check_sub_item_cn.setChecked(currentLanguage === "cn");
+
+    console.log('Chinese pressed');
   },
 });
 
@@ -41,7 +45,6 @@ const icon_item = await IconMenuItem.new({
   },
 });
 
-const createMenu = async () => {
 
   const menu = await Menu.new({
     items: [
@@ -78,9 +81,6 @@ const createMenu = async () => {
   });
 
   await menu.setAsAppMenu()
-};
-
-createMenu();
 
 </script>
 
