@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { Menu, CheckMenuItem, IconMenuItem } from '@tauri-apps/api/menu';
+import { Menu, CheckMenuItem, IconMenuItem, MenuItem } from '@tauri-apps/api/menu';
 import { Image } from '@tauri-apps/api/image';
-
-//  todo: `icon`  `text`  `check` type change status
 
 let currentLanguage = 'en';
 
@@ -14,7 +12,6 @@ const check_sub_item_en = await CheckMenuItem.new({
     currentLanguage = 'en';
     check_sub_item_en.setChecked(currentLanguage === "en");
     check_sub_item_cn.setChecked(currentLanguage === "cn");
-
     console.log('English pressed');
   },
 });
@@ -27,60 +24,50 @@ const check_sub_item_cn = await CheckMenuItem.new({
     currentLanguage = 'cn';
     check_sub_item_en.setChecked(currentLanguage === "en");
     check_sub_item_cn.setChecked(currentLanguage === "cn");
-
     console.log('Chinese pressed');
   },
 });
 
 // Load icon from path
 const icon = await Image.fromPath('../src/icon.png')
-console.log(icon);
+const icon2 = await Image.fromPath('../src/icon-2.png')
 
 const icon_item = await IconMenuItem.new({
   id: 'icon_item',
   text: 'Icon Item',
   icon: icon,
   action: () => {
+    icon_item.setIcon(icon2);
     console.log('icon pressed');
   },
 });
 
+const text_item = await MenuItem.new({
+  id: 'text_item',
+  text: 'Text Item',
+  action: () => {
+    text_item.setText('Text Item Changed');
+    console.log('text pressed');
+  },
+});
 
-  const menu = await Menu.new({
-    items: [
-      {
-        id: 'file',
-        text: 'File',
-        items: [
-          {
-            id: 'open',
-            text: 'Open',
-            action: () => {
-              console.log('open pressed');
-            },
-          },
-          {
-            id: 'quit',
-            text: 'Quit',
-            action: () => {
-              console.log('Quit pressed');
-            },
-          },
-        ],
-      },
-      {
-        id: 'language_items',
-        text: 'language',
-        items: [
-          check_sub_item_en,
-          check_sub_item_cn,
-          icon_item,
-        ],
-      },
-    ],
-  });
 
-  await menu.setAsAppMenu()
+const menu = await Menu.new({
+  items: [
+    {
+      id: 'change menu',
+      text: 'change_menu',
+      items: [
+        text_item,
+        check_sub_item_en,
+        check_sub_item_cn,
+        icon_item,
+      ],
+    },
+  ],
+});
+
+await menu.setAsAppMenu()
 
 </script>
 

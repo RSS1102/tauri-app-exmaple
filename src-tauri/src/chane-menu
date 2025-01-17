@@ -1,0 +1,100 @@
+// Prevents additional console window on Windows in release, DO NOT REMOVE!!
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
+use tauri::{
+    image::Image,
+    menu::{CheckMenuItemBuilder, MenuBuilder, Submenu, SubmenuBuilder},
+    AppHandle, Wry,
+};
+
+fn create_text_menu(
+    app: &AppHandle,
+    text: &str,
+    icon: Image<'_>,
+    checked_type: String,
+) -> Result<Submenu<Wry>, tauri::Error> {
+    let check_sub_item_en = CheckMenuItemBuilder::new("en")
+        .id("en")
+        .checked(checked_type=="en")
+        .build(app)?;
+
+    let check_sub_item_zh = CheckMenuItemBuilder::new("zh")
+        .id("zh")
+        .checked(checked_type=="zh")
+        .build(app)?;
+
+    let menu_item = SubmenuBuilder::new(app, "Change menu")
+        .text("change_text", text)
+        .icon("change_icon", "icon", icon)
+        .items(&[&check_sub_item_en, &check_sub_item_zh])
+        .build()?;
+    Ok(menu_item)
+}
+fn main() {
+    tauri::Builder::default()
+        .setup(|app| {
+            let sub_menu = create_text_menu(
+                app.handle(),
+                "click to change menu text",
+                app.default_window_icon().cloned().unwrap(),
+                "en".to_string(),
+            )
+            .unwrap();
+            let menu = MenuBuilder::new(app).items(&[&sub_menu]).build()?;
+
+            app.set_menu(menu)?;
+
+            app.on_menu_event(move |app_handle: &tauri::AppHandle, event| {
+                match event.id().0.as_str() {
+                    // Persistence needs to be solved by yourself
+                    "change_text" => {
+                        let sub_menu = create_text_menu(
+                            app_handle,
+                            "changed menu text",
+                            Image::from_bytes(include_bytes!("../icons/icon.png")).unwrap(),
+                            "en".to_string(),
+                        )
+                        .unwrap();
+                        if let Ok(menu) = MenuBuilder::new(app_handle).items(&[&sub_menu]).build() {
+                            let _ = app_handle.set_menu(menu);
+                        }
+                    }
+                    // Persistence needs to be solved by yourself
+                    "change_icon" => {
+                        let sub_menu = create_text_menu(
+                            app_handle,
+                            "changed menu icon",
+                            Image::from_bytes(include_bytes!("../icons/icon.png")).unwrap(),
+                            "en".to_string(),
+                        )
+                        .unwrap();
+                        if let Ok(menu) = MenuBuilder::new(app_handle).items(&[&sub_menu]).build() {
+                            let _ = app_handle.set_menu(menu);
+                        }
+                    }
+
+                    // Persistence needs to be solved by yourself
+                    "en"|"zh" => {
+                         
+                        let sub_menu = create_text_menu(
+                            app_handle,
+                            "changed menu icon",
+                            Image::from_bytes(include_bytes!("../icons/icon-2.png")).unwrap(),
+                            (&event.id().0.as_str()).to_string(),
+                        )
+                        .unwrap();
+                        if let Ok(menu) = MenuBuilder::new(app_handle).items(&[&sub_menu]).build() {
+                            let _ = app_handle.set_menu(menu);
+                        }
+                    }
+                    _ => {
+                        println!("unexpected menu event");
+                    }
+                }
+            });
+
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running tauri application");
+}
