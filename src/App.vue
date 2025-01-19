@@ -1,50 +1,71 @@
+<!-- change-menu-status -->
 <script setup lang="ts">
-import { Menu, PredefinedMenuItem } from '@tauri-apps/api/menu';
+import { Menu, CheckMenuItem, IconMenuItem, MenuItem } from '@tauri-apps/api/menu';
+import { Image } from '@tauri-apps/api/image';
 
-const copy = await PredefinedMenuItem.new({
-  text: 'copy-text',
-  item: 'Copy',
+let currentLanguage = 'en';
+
+const check_sub_item_en = await CheckMenuItem.new({
+  id: 'en',
+  text: 'English',
+  checked: currentLanguage === 'en',
+  action: () => {
+    currentLanguage = 'en';
+    check_sub_item_en.setChecked(currentLanguage === "en");
+    check_sub_item_zh.setChecked(currentLanguage === "cn");
+    console.log('English pressed');
+  },
 });
 
-const separator = await PredefinedMenuItem.new({
-  text: 'separator-text',
-  item: 'Separator',
+const check_sub_item_zh = await CheckMenuItem.new({
+  id: 'zh',
+  text: 'Chinese',
+  checked: currentLanguage === 'zh',
+  action: () => {
+    currentLanguage = 'zh';
+    check_sub_item_en.setChecked(currentLanguage === "en");
+    check_sub_item_zh.setChecked(currentLanguage === "zh");
+    check_sub_item_zh.setAccelerator('Ctrl+L');
+    console.log('Chinese pressed');
+  },
 });
 
-const undo = await PredefinedMenuItem.new({
-  text: 'undo-text',
-  item: 'Undo',
+// Load icon from path
+const icon = await Image.fromPath('../src/icon.png')
+const icon2 = await Image.fromPath('../src/icon-2.png')
+
+const icon_item = await IconMenuItem.new({
+  id: 'icon_item',
+  text: 'Icon Item',
+  icon: icon,
+  action: () => {
+    icon_item.setIcon(icon2);
+    console.log('icon pressed');
+  },
 });
 
-const redo = await PredefinedMenuItem.new({
-  text: 'redo-text',
-  item: 'Redo',
+const text_item = await MenuItem.new({
+  id: 'text_item',
+  text: 'Text Item',
+  action: () => {
+    text_item.setText('Text Item Changed');
+    console.log('text pressed');
+  },
 });
 
-const cut = await PredefinedMenuItem.new({
-  text: 'cut-text',
-  item: 'Cut',
-});
-
-const paste = await PredefinedMenuItem.new({
-  text: 'paste-text',
-  item: 'Paste',
-});
-
-const select_all = await PredefinedMenuItem.new({
-  text: 'select_all-text',
-  item: 'SelectAll',
-});
 
 const menu = await Menu.new({
   items: [
-    copy,
-    separator,
-    undo,
-    redo,
-    cut,
-    paste,
-    select_all,
+    {
+      id: 'change menu',
+      text: 'change_menu',
+      items: [
+        text_item,
+        check_sub_item_en,
+        check_sub_item_zh,
+        icon_item,
+      ],
+    },
   ],
 });
 
